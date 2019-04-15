@@ -7,12 +7,16 @@ import datetime
 import random
 
 def gen_dates(base_date, days):
+    """
+    Generate days list
+    :param base_date: start date
+    :param days: how many days to generate the list
+    :return: days list
+    """
     day = datetime.timedelta(days = 1)
     for i in range(days):
         yield base_date + day * i
 
-#10.2.3.4 [2018/13/10:14:02:39] "GET /api/playeritems?playerId=3" 200 1230
-#10.3.4.5 [2018/13/10:14:02:41] "GET /api/playeritems?playerId=2" 200 4630
 def generate_log(dir, start_date, end_date, ip_addr, http_verb_uri_collect, http_verb_uri_other, per_200, resp_time_90, resp_time_95, resp_time_99):
     """
     Generate logs
@@ -59,6 +63,8 @@ def generate_log(dir, start_date, end_date, ip_addr, http_verb_uri_collect, http
                 else:
                     response_time = str(random.randint(resp_time_99 + 1, resp_time_99 * 2))
 
+                #10.2.3.4 [2018/13/10:14:02:39] "GET /api/playeritems?playerId=3" 200 1230
+                #10.3.4.5 [2018/13/10:14:02:41] "GET /api/playeritems?playerId=2" 200 4630
                 log = "{} [{}] {} {} {}\n".format(log_ip_addr, log_time.strftime('%Y-%m-%d %H:%M:%S:%f')[:-3], http_verb_uri, response_status, response_time)
                 log_file.write(log)
 
@@ -67,17 +73,14 @@ def generate_log(dir, start_date, end_date, ip_addr, http_verb_uri_collect, http
             log_file.close()
     return
 
-####################################
-#1. create directory if not exist
-#2. create log file
-####################################
-
 def main():
+    #get config from config file
     config = ConfigParser.ConfigParser()
     with open("logper.cfg", "r") as cfg_file:
         config.readfp(cfg_file)
 
         for section in config.sections():
+            #config is in Generator section
             if section == "Generator":
                 dir = config.get(section, "dir")
                 start_date = datetime.datetime.strptime(config.get(section, "start_date"), '%Y-%m-%d')
@@ -90,9 +93,11 @@ def main():
                 resp_time_95 = int(config.get(section, "resp_time_95"))
                 resp_time_99 =int(config.get(section, "resp_time_99"))
 
+                #create directory if not exist
                 if not os.path.exists(dir):
                     os.makedirs(dir)
             
+                #generate log according to config
                 generate_log(dir, start_date, end_date, ip_addr, http_verb_uri_collect, http_verb_uri_other, per_200, resp_time_90, resp_time_95, resp_time_99)
 
 if __name__ == '__main__':
