@@ -16,6 +16,6 @@ def main():
 
         for section in config.sections():
             dir = config.get(section, "dir")
-            ext = config.get(section, "ext")
 
-main()
+if __name__ == '__main__':
+    main()
