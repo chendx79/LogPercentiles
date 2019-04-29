@@ -43,24 +43,27 @@ def collect_data(dir, start_date, end_date, filter_ip_addr, filter_api_uri, filt
                 #10.0.0.4 [2019-04-07 01:21:30:724] "GET /api/playeritems?playerId=26" 200 22
 
                 end_ip_addr = data.find(" ", 0)
-                ip_addr = data[0 : end_ip_addr]
-                if filter_ip_addr != "" and ip_addr != filter_ip_addr:
-                    data = log_file.readline()
-                    continue
+                if filter_ip_addr != "":
+                    ip_addr = data[0 : end_ip_addr]
+                    if ip_addr != filter_ip_addr:
+                        data = log_file.readline()
+                        continue
 
                 end_log_time = data.find("]", end_ip_addr) + 1
 
                 end_api_uri = data.find("\"", end_log_time + 2) + 1
-                api_uri = data[end_log_time + 1 : end_api_uri]
-                if filter_api_uri != "" and api_uri.find(filter_api_uri) < 0:
-                    data = log_file.readline()
-                    continue
+                if filter_api_uri != "":
+                    api_uri = data[end_log_time + 1 : end_api_uri]
+                    if api_uri.find(filter_api_uri) < 0:
+                        data = log_file.readline()
+                        continue
 
                 end_status_code = data.find(" ", end_api_uri + 2)
-                status_code = data[end_api_uri + 1 : end_status_code]
-                if filter_status_code != "" and status_code != filter_status_code:
-                    data = log_file.readline()
-                    continue
+                if filter_status_code != "":
+                    status_code = data[end_api_uri + 1 : end_status_code]
+                    if status_code != filter_status_code:
+                        data = log_file.readline()
+                        continue
 
                 end_resp_time = len(data) - 1
                 resp_time = data[end_status_code + 1: end_resp_time]
@@ -89,7 +92,7 @@ def calc_percentile(array, p):
     # 90% of requests return a response within X ms
     # 95% of requests return a response within Y ms
     # 99% of requests return a response within Z ms
-    print "{0}% of requests return a response within {1} ms".format(int(p * 100), percentile)
+    print "{0}% of requests return a response within {1} ms".format(int(p * 100), int(percentile))
 
 def main():
     config = ConfigParser.ConfigParser()
