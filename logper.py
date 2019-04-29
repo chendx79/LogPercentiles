@@ -32,11 +32,13 @@ def gen_dates(base_date, days):
         yield base_date + day * i
 
 def collect_data(dir, start_date, end_date, filter_ip_addr, filter_api_uri, filter_status_code):
+    collected_data = []
+
     for date in gen_dates(start_date, (end_date - start_date).days + 1):
         filename = date.strftime(dir + "%Y-%m-%d" + ".log")
         with open(filename, "r") as log_file:
             data = log_file.readline()
-            line_count = 0
+
             while data != "":
                 #10.0.0.4 [2019-04-07 01:21:30:724] "GET /api/playeritems?playerId=26" 200 22
 
@@ -62,16 +64,32 @@ def collect_data(dir, start_date, end_date, filter_ip_addr, filter_api_uri, filt
 
                 end_resp_time = len(data) - 1
                 resp_time = data[end_status_code + 1: end_resp_time]
-
-                # print data
-                # print "{0}|{1}|{2}|{3}".format(ip_addr, api_uri, status_code, resp_time)
-                line_count += 1
+                collected_data.append(int(resp_time))
 
                 data = log_file.readline()
-        print filename, line_count
 
-def print_percentage():
-    return
+    collected_data.sort()
+    calc_percentile(collected_data, 0.9)
+    calc_percentile(collected_data, 0.95)
+    calc_percentile(collected_data, 0.99)
+
+def calc_percentile(array, p):
+    """
+    Calculate percentile
+    :param array: the sorted array which stored data
+    :param p: percentage to calculate
+    :return: 
+    """
+    n = len(array)
+    f = (n - 1) * p
+    i = int(f)
+    j = f - i
+
+    percentile = (1 - j) * array[i] + j * array[i + 1]
+    # 90% of requests return a response within X ms
+    # 95% of requests return a response within Y ms
+    # 99% of requests return a response within Z ms
+    print "{0}% of requests return a response within {1} ms".format(int(p * 100), percentile)
 
 def main():
     config = ConfigParser.ConfigParser()
